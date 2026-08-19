@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combinaisons — accès</title>
+<link rel="icon" href="{{ url_for('static', filename='cards/17.svg') }}">
+<style>
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    background: #f4ecdd; color: #2f2b3d;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  }
+  .box { width: min(360px, 88vw); text-align: center; }
+  img { width: 130px; border-radius: 10px; box-shadow: 0 6px 18px rgba(47,43,61,.16); }
+  h1 { font-family: Georgia, serif; font-size: 22px; font-weight: normal; margin: 20px 0 4px; }
+  p { color: #6c6580; font-size: 14px; margin: 0 0 20px; }
+  input, button { font: inherit; font-size: 16px; width: 100%; padding: 11px 13px; border-radius: 9px; }
+  input { border: 1px solid #ded1b8; background: #fbf6ec; text-align: center; letter-spacing: 3px; }
+  input:focus { outline: none; border-color: #b9902f; box-shadow: 0 0 0 3px rgba(185,144,47,.15); }
+  button { margin-top: 10px; border: 1px solid #2f2b3d; background: #2f2b3d; color: #f7f1e4; cursor: pointer; }
+  .err { color: #a94436; font-size: 14px; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <form class="box" method="post">
+    <img src="{{ url_for('static', filename='cards/17.svg') }}" alt="">
+    <h1>Combinaisons</h1>
+    <p>Entrez le code d'accès</p>
+    <input name="code" type="password" autofocus autocomplete="current-password" inputmode="text">
+    <button type="submit">Entrer</button>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  </form>
+</body>
+</html>

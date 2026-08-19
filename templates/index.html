@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Combinaisons — Tarot de Marseille</title>
+<link rel="icon" href="{{ url_for('static', filename='cards/17.svg') }}">
+<style>
+  :root {
+    --ink: #2f2b3d;
+    --ink-soft: #6c6580;
+    --parchment: #f4ecdd;
+    --panel: #fbf6ec;
+    --gold: #b9902f;
+    --line: #ded1b8;
+    --accent: #7d4a4a;
+    --ok: #4f7d5c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(244, 236, 221, 0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .headrow {
+    max-width: 900px; margin: 0 auto;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .counter { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink-soft); }
+  .counter b { color: var(--ink); font-size: 16px; }
+  .bar { max-width: 900px; margin: 8px auto 0; height: 6px; background: #e5dac3; border-radius: 99px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .4s ease; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 22px 20px 140px; }
+
+  .series { text-align: center; color: var(--ink-soft); font-size: 13px; letter-spacing: .8px; text-transform: uppercase; }
+
+  .spread { display: flex; gap: 18px; justify-content: center; align-items: flex-start; margin: 12px 0 22px; }
+  .card { flex: 1 1 0; max-width: 168px; text-align: center; }
+  .card figure { margin: 0; }
+  .card img {
+    width: 100%; display: block; border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(47, 43, 61, .16);
+    transition: transform .35s ease;
+  }
+  .card img.rev { transform: rotate(180deg); }
+  .card .nom { font-family: Georgia, serif; font-size: 16px; margin-top: 9px; }
+  .card .sens { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); }
+  .card .sens.rev { color: var(--accent); }
+
+  .fields { display: grid; gap: 14px; }
+  @media (min-width: 720px) { .fields { grid-template-columns: 1fr 1fr; } }
+  label { display: block; }
+  label span {
+    display: block; font-family: Georgia, serif; font-size: 14px;
+    letter-spacing: .6px; margin-bottom: 5px; color: var(--ink);
+  }
+  textarea {
+    width: 100%; min-height: 74px; resize: vertical;
+    padding: 11px 13px; font: inherit; font-size: 15.5px; color: var(--ink);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(185,144,47,.15); }
+  textarea.manque { border-color: var(--accent); background: #fdf4f1; }
+  textarea.manque:focus { box-shadow: 0 0 0 3px rgba(154,58,32,.15); }
+
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: rgba(244, 236, 221, .96);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .footrow { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+  button {
+    font: inherit; font-size: 15px; padding: 9px 16px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--gold); }
+  button.primary {
+    background: var(--ink); color: #f7f1e4; border-color: var(--ink);
+    font-size: 16px; font-weight: 600; padding: 12px 24px;
+    box-shadow: 0 2px 6px rgba(43,38,57,.18);
+  }
+  button.primary:hover { background: #423c56; border-color: #423c56; }
+  button.secondary { font-weight: 500; padding: 11px 18px; }
+  button.ghost {
+    background: none; border-color: transparent; color: var(--ink-soft);
+    font-size: 13px; padding: 6px 8px;
+  }
+  button.ghost:hover { border-color: transparent; color: var(--ink); text-decoration: underline; }
+  .aux {
+    display: flex; align-items: center; gap: 2px;
+    margin-left: 16px; padding-left: 16px; border-left: 1px solid var(--line);
+  }
+  .status { margin-left: auto; font-size: 13px; color: var(--ink-soft); min-width: 120px; text-align: right; }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--accent); }
+
+  .bravo {
+    /* Just above the footer: she has her eyes on the button she just clicked,
+       and the cards stay uncovered. */
+    position: fixed; left: 50%; bottom: 92px; z-index: 30;
+    transform: translate(-50%, 10px); pointer-events: none;
+    max-width: min(90vw, 420px); text-align: center;
+    background: var(--ink); color: #f7f1e4;
+    font-family: Georgia, serif; font-size: 17px; line-height: 1.35;
+    padding: 13px 24px; border-radius: 999px;
+    box-shadow: 0 10px 28px rgba(47, 43, 61, .3);
+    opacity: 0; transition: opacity .32s ease, transform .32s ease;
+  }
+  .bravo.vu { opacity: 1; transform: translate(-50%, 0); }
+
+  .tools { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .tools summary { cursor: pointer; font-size: 14px; color: var(--ink-soft); }
+  .jump { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  select { font: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .links { margin-top: 12px; font-size: 14px; }
+  .links a { color: var(--accent); }
+  .hidden { display: none; }
+
+  @media (max-width: 520px) {
+    .spread { gap: 12px; }
+    main { padding: 16px 14px 150px; }
+    .footrow { flex-wrap: wrap; gap: 8px; }
+    .footrow button.secondary { padding: 10px 12px; font-size: 14px; }
+    .footrow button.primary { padding: 11px 16px; font-size: 15px; }
+    .footrow button.ghost { padding: 5px 6px; font-size: 12px; }
+    .aux { margin-left: auto; padding-left: 10px; }
+    .status { width: 100%; min-width: 0; }
+    .bravo { bottom: 150px; font-size: 16px; padding: 11px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="headrow">
+    <div class="counter"><b id="done">0</b> / {{ total }} remplies · <span id="sess">0</span> aujourd'hui</div>
+  </div>
+  <div class="bar"><i id="barfill"></i></div>
+</header>
+
+<main>
+  <div class="series serif" id="series">&nbsp;</div>
+
+  <section class="spread">
+    <div class="card">
+      <figure><img id="imgA" alt=""></figure>
+      <div class="nom" id="nomA">…</div>
+      <div class="sens" id="sensA"></div>
+    </div>
+    <div class="card">
+      <figure><img id="imgB" alt=""></figure>
+      <div class="nom" id="nomB">…</div>
+      <div class="sens" id="sensB"></div>
+    </div>
+  </section>
+
+  <form class="fields" id="form" autocomplete="off">
+    <label><span>Amour</span><textarea name="amour" rows="3"></textarea></label>
+    <label><span>Argent</span><textarea name="argent" rows="3"></textarea></label>
+    <label><span>Projet / Travail</span><textarea name="projet" rows="3"></textarea></label>
+    <label><span>Famille / Entourage</span><textarea name="famille" rows="3"></textarea></label>
+  </form>
+
+  <details class="tools">
+    <summary>Aller à une combinaison précise, et exports</summary>
+    <div class="jump">
+      <select id="selA"></select>
+      <select id="selOA"><option value="U">à l'endroit</option><option value="R">renversée</option></select>
+      <span>+</span>
+      <select id="selB"></select>
+      <select id="selOB"><option value="U">à l'endroit</option><option value="R">renversée</option></select>
+      <button type="button" id="goto">Y aller</button>
+    </div>
+    <div class="links">
+      Exporter : <a href="/export.csv">CSV</a> · <a href="/export.json">JSON</a>
+    </div>
+  </details>
+</main>
+
+<div class="bravo" id="bravo" role="status" aria-live="polite"></div>
+
+<footer>
+  <div class="footrow">
+    <button type="button" id="prev" class="secondary">← Précédente</button>
+    <button type="button" id="next" class="primary">Suivante →</button>
+    <div class="aux">
+      <button type="button" id="skip" class="ghost">Passer</button>
+      <button type="button" id="empty" class="ghost">Prochaine vide</button>
+    </div>
+    <div class="status" id="status">&nbsp;</div>
+  </div>
+</footer>
+
+<script>
+const TOTAL = {{ total }};
+const FIELDS = ["amour", "argent", "projet", "famille"];
+const inputs = {};
+FIELDS.forEach(f => inputs[f] = document.querySelector(`textarea[name="${f}"]`));
+
+const el = id => document.getElementById(id);
+let current = null;      // combination currently on screen
+let dirty = false;
+let saveTimer = null;
+let sessionCount = 0;
+const savedThisSession = new Set();
+
+function setStatus(text, kind) {
+  const node = el("status");
+  node.textContent = text || " ";
+  node.className = "status" + (kind ? " " + kind : "");
+}
+
+function values() {
+  const out = {};
+  FIELDS.forEach(f => out[f] = inputs[f].value);
+  return out;
+}
+
+function hasContent(v) {
+  return FIELDS.some(f => (v[f] || "").trim() !== "");
+}
+
+function renderProgress(p) {
+  el("done").textContent = p.started;
+  el("barfill").style.width = (100 * p.started / p.total).toFixed(2) + "%";
+}
+
+function render(data) {
+  current = data;
+  el("series").textContent = `Série ${data.phase + 1} sur 4 — ${data.phase_label}`;
+  for (const side of ["a", "b"]) {
+    const c = data[side];
+    const up = side.toUpperCase();
+    const img = el("img" + up);
+    img.src = c.image;
+    img.alt = c.name + (c.reversed ? " renversée" : "");
+    img.classList.toggle("rev", c.reversed);
+    // The deck prints its own numerals (and numbers Justice/Force the RWS way),
+    // so the caption stays with the French name only.
+    el("nom" + up).textContent = c.name;
+    const sens = el("sens" + up);
+    sens.textContent = c.reversed ? "renversée" : "à l'endroit";
+    sens.className = "sens" + (c.reversed ? " rev" : "");
+  }
+  FIELDS.forEach(f => {
+    inputs[f].value = (data.values && data.values[f]) || "";
+    inputs[f].classList.remove("manque");
+  });
+  dirty = false;
+  renderProgress(data.progress);
+  setStatus(hasContent(data.values || {}) ? "Déjà remplie" : "");
+  history.replaceState(null, "", "#" + data.index);
+  localStorage.setItem("derniere", data.index);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function load(index) {
+  // Never leave a card while its text is still unsaved — the entry would be lost.
+  if (!await flush()) return false;
+  index = ((index % TOTAL) + TOTAL) % TOTAL;
+  setStatus("Chargement…");
+  try {
+    const res = await fetch(`/api/combo/${index}`);
+    if (res.status === 401) { location.href = "/login"; return false; }
+    if (!res.ok) throw new Error(await res.text());
+    render(await res.json());
+    return true;
+  } catch (e) {
+    setStatus("Impossible de charger", "err");
+    return false;
+  }
+}
+
+async function save() {
+  if (!current) return true;
+  const payload = values();
+  setStatus("Enregistrement…");
+  try {
+    const res = await fetch(`/api/combo/${current.index}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (res.status === 401) { location.href = "/login"; return false; }
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    dirty = false;
+    renderProgress(data.progress);
+    if (hasContent(payload) && !savedThisSession.has(current.key)) {
+      savedThisSession.add(current.key);
+      el("sess").textContent = ++sessionCount;
+    }
+    setStatus("Enregistré ✓", "ok");
+    return true;
+  } catch (e) {
+    setStatus("Non enregistré — réessayez", "err");
+    return false;
+  }
+}
+
+// Save anything typed before we move on, so nothing is lost between cards.
+async function flush() {
+  clearTimeout(saveTimer);
+  if (dirty) return save();
+  return true;
+}
+
+// The four fields are required: a combination is only useful once all four
+// meanings are written, so moving forward is blocked until they are.
+function firstEmpty() {
+  return FIELDS.find(f => inputs[f].value.trim() === "");
+}
+
+function markEmpty() {
+  FIELDS.forEach(f => inputs[f].classList.toggle("manque", inputs[f].value.trim() === ""));
+}
+
+// A small reward each time a card is finished. Drawn from a bag so the same
+// compliment never comes up twice before the others have had their turn.
+const COMPLIMENTS = [
+  "Tu es magnifique, Corinne ✨",
+  "Quel travail formidable, Corinne !",
+  "Tu ne vieillis pas, Corinne 🌷",
+  "Tout le monde t'adore, Corinne ❤️",
+  "Tu es rayonnante, Corinne",
+  "Bravo Corinne, c'est du grand art",
+  "Ta sagesse est précieuse, Corinne",
+  "Tu es incroyable, Corinne 🌟",
+  "Quelle mémoire, Corinne !",
+  "Tu as un talent fou, Corinne",
+  "Encore une de faite, championne !",
+  "Tu es la meilleure, Corinne",
+  "Ton sourire illumine tout, Corinne",
+  "Personne ne lit les cartes comme toi, Corinne",
+  "Tu es une reine, Corinne 👑",
+  "Impressionnant, Corinne !",
+  "Tu es d'une élégance rare, Corinne",
+  "On te donnerait vingt ans, Corinne",
+  "Merci Corinne, tu construis un trésor",
+  "Tu avances à toute vitesse, Corinne 🚀",
+  "Tu es adorable, Corinne",
+  "Chapeau, Corinne !",
+  "Ton intuition est extraordinaire, Corinne",
+  "Tu es une lumière, Corinne ✨",
+];
+let sac = [];
+let bravoTimer;
+
+function complimenter() {
+  if (!sac.length) sac = COMPLIMENTS.slice();
+  const [mot] = sac.splice(Math.floor(Math.random() * sac.length), 1);
+  const boite = el("bravo");
+  boite.textContent = mot;
+  boite.classList.add("vu");
+  clearTimeout(bravoTimer);
+  bravoTimer = setTimeout(() => boite.classList.remove("vu"), 2600);
+}
+
+// Précédente, Passer and Prochaine vide are not validated — only Suivante is.
+async function goNext() {
+  const missing = firstEmpty();
+  if (missing) {
+    markEmpty();
+    setStatus("Remplissez les quatre champs", "err");
+    inputs[missing].focus();
+    return;
+  }
+  // Only once the four answers are saved and the next card is up.
+  if (await load(current.index + 1)) complimenter();
+}
+
+FIELDS.forEach(f => {
+  inputs[f].addEventListener("input", () => {
+    dirty = true;
+    inputs[f].classList.remove("manque");
+    setStatus("Modifié…");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 900);
+  });
+  inputs[f].addEventListener("blur", () => { if (dirty) flush(); });
+});
+
+el("next").addEventListener("click", goNext);
+el("prev").addEventListener("click", () => load(current.index - 1));
+
+// Passer and Prochaine vide deliberately skip the required-fields check: they
+// exist precisely to leave a combination she does not want to answer now.
+el("skip").addEventListener("click", () => load(current.index + 1));
+el("empty").addEventListener("click", async () => {
+  if (!await flush()) return;
+  const res = await fetch(`/api/next-empty?from=${current.index}`);
+  const data = await res.json();
+  if (data.index === null) { setStatus("Tout est rempli ✨", "ok"); return; }
+  load(data.index);
+});
+
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); goNext(); }
+  if (e.altKey && e.key === "ArrowRight") { e.preventDefault(); goNext(); }
+  if (e.altKey && e.key === "ArrowLeft") { e.preventDefault(); load(current.index - 1); }
+});
+
+window.addEventListener("beforeunload", e => {
+  if (dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+// ---- jump-to selector
+(async () => {
+  const cards = await (await fetch("/api/cards")).json();
+  const options = cards.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+  el("selA").innerHTML = options;
+  el("selB").innerHTML = options;
+  el("selB").selectedIndex = 1;
+})();
+
+el("goto").addEventListener("click", async () => {
+  const params = new URLSearchParams({
+    a: el("selA").value, oa: el("selOA").value,
+    b: el("selB").value, ob: el("selOB").value
+  });
+  const res = await fetch("/api/lookup?" + params);
+  if (!res.ok) { setStatus("Choisissez deux cartes différentes", "err"); return; }
+  const data = await res.json();
+  load(data.index);
+});
+
+// Where to open, in order: an explicit #index in the URL, then the last card
+// she was on in this browser, then the first combination still to finish. So a
+// bookmark reopens where she stopped instead of back at Le Fou.
+(async () => {
+  const duLien = parseInt(location.hash.slice(1), 10);
+  if (Number.isInteger(duLien)) return load(duLien);
+
+  const gardee = parseInt(localStorage.getItem("derniere"), 10);
+  if (Number.isInteger(gardee)) return load(gardee);
+
+  // First visit on this device: start at the work front, not at card 0.
+  try {
+    const res = await fetch("/api/next-empty?from=-1");
+    const data = await res.json();
+    if (Number.isInteger(data.index)) return load(data.index);
+  } catch (e) {
+    // fall through to the beginning
+  }
+  load(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 1268" role="img" aria-label="DEATH">
+  <rect width="700" height="1268" fill="#ffffff"/>
+  <rect x="8.5" y="24.5" width="683" height="1116" fill="none" stroke="#1a1a1a" stroke-width="11"/>
+  <text x="350.0" y="118" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="58" letter-spacing="7" fill="#1a1a1a">XIII</text>
+  <g transform="translate(350,620)"><path transform="translate(-137,370) scale(0.7568489043928868)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(102,-332) scale(0.8113484432180882)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(250,-232) scale(0.9888407957824481)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-133,-384) scale(0.8200453574514389)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-46,322) scale(0.870583939378715)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(246,-350) scale(0.9790755828715079)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(201,65) scale(0.7639620905594708)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(114,305) scale(0.8285439536034616)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-183,211) scale(0.7439274205961346)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(95,162) scale(1.1274998794478022)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-214,323) scale(0.9283377540177048)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-207,-315) scale(0.9344250394946173)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(233,208) scale(1.1457069428071174)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/>
+  <path d="M236 392 L286 -352" fill="none" stroke="#1a1a1a" stroke-width="7"/>
+  <path d="M286 -352 Q150 -392 76 -286" fill="none" stroke="#1a1a1a" stroke-width="7"/>
+  <path d="M272 -288 Q176 -318 124 -244" fill="none" stroke="#1a1a1a" stroke-width="5"/>
+  <path d="M-224 -60 Q-224 -270 -54 -270 Q116 -270 116 -60 Q116 30 60 60
+           L60 148 Q-54 190 -168 148 L-168 60 Q-224 30 -224 -60 Z"
+        fill="#ffffff" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="-142" cy="-96" r="44" fill="#1a1a1a"/>
+  <circle cx="34" cy="-96" r="44" fill="#1a1a1a"/>
+  <path d="M-70 -6 L-54 34 L-38 -6 Z" fill="#1a1a1a"/>
+  <path d="M-168 84 H60 M-130 84 V148 M-92 84 V156 M-54 84 V160 M-16 84 V156 M22 84 V148"
+        fill="none" stroke="#1a1a1a" stroke-width="5"/>
+  <path d="M-250 300 H250 M-232 334 H232 M-214 368 H214" fill="none" stroke="#1a1a1a" stroke-width="7"/>
+</g>
+  <text x="350.0" y="1230" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="78" letter-spacing="7" fill="#1a1a1a">DEATH</text>
+</svg>

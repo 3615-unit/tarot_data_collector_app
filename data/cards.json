@@ -1,0 +1,156 @@
+[
+  {
+    "id": "00",
+    "numeral": "",
+    "name": "Le Fou",
+    "hint_upright": "",
+    "hint_reversed": ""
+  },
+  {
+    "id": "01",
+    "numeral": "I",
+    "name": "Le Bateleur",
+    "hint_upright": "départ - outils - potentiel",
+    "hint_reversed": "départ difficile ou mauvais départ - mauvaise maitrise des outil - potentiel non maitrisé"
+  },
+  {
+    "id": "02",
+    "numeral": "II",
+    "name": "La Papesse",
+    "hint_upright": "évolution secrète- observation- passivité",
+    "hint_reversed": "Evolution difficile ou mauvaise - observation hypocrite - passivité extrême"
+  },
+  {
+    "id": "03",
+    "numeral": "III",
+    "name": "L'Impératrice",
+    "hint_upright": "elaboration mentale - apprentissage - conception",
+    "hint_reversed": "elaboration mentale difficile - mauvais apprentissage - conception non maitrisée"
+  },
+  {
+    "id": "04",
+    "numeral": "IIII",
+    "name": "L'Empereur",
+    "hint_upright": "concrétisation - solidification -en chantier - contremaître",
+    "hint_reversed": "concrétisation difficile ou mauvaise -mauvais chantier ou mauvais contremaître - solidification non maîtrisée"
+  },
+  {
+    "id": "05",
+    "numeral": "V",
+    "name": "Le Pape",
+    "hint_upright": "approfondissement- bénédiction - valeurs - orientation",
+    "hint_reversed": "approfondissement difficile - non conformité des valeurs - mauvaise orientation - orientation difficile - bénédictions sujettes à des rectifications - excommunication"
+  },
+  {
+    "id": "06",
+    "numeral": "VI",
+    "name": "L'Amoureux",
+    "hint_upright": "Carrefour - multiplicité - désir - choix",
+    "hint_reversed": "carrefour difficile -mauvais choix - multiplicité non maîtrisée (on s'éparpille) - désir non maîtrisé ou mauvais"
+  },
+  {
+    "id": "07",
+    "numeral": "VII",
+    "name": "Le Chariot",
+    "hint_upright": "Progression - Maîtrise - Autonomie et Indépendance",
+    "hint_reversed": "Progression difficile - Maîtrise difficile - Autonomie et Indépendance difficile - Obstacle"
+  },
+  {
+    "id": "08",
+    "numeral": "VIII",
+    "name": "La Justice",
+    "hint_upright": "Normalisation - équilibre et règlement",
+    "hint_reversed": "Normalisation difficile - Mauvais règlement - Equilibre non maîtrisé - Le fait d'être hors la loi"
+  },
+  {
+    "id": "09",
+    "numeral": "IX",
+    "name": "L'Hermite",
+    "hint_upright": "Temps - Recherche - Murissement - solitude",
+    "hint_reversed": "Temps difficile et pesant - recherche interminable - Murissement mauvais ou difficile - solitude extrême - Remède inefficace"
+  },
+  {
+    "id": "10",
+    "numeral": "X",
+    "name": "La Roue de la Fortune",
+    "hint_upright": "Mouvement - surprise - opportunité - chance",
+    "hint_reversed": "Mauvaise surprise - Mauvaise opportunité - Mouvement non maitrisé - Mauvaise chance"
+  },
+  {
+    "id": "11",
+    "numeral": "XI",
+    "name": "La Force",
+    "hint_upright": "Réalisation - domptage - énergie",
+    "hint_reversed": "Réalisation difficile - mauvaise réalisation - domptage difficile - énergie non maîtrisée - guerre - épuisement"
+  },
+  {
+    "id": "12",
+    "numeral": "XII",
+    "name": "Le Pendu",
+    "hint_upright": "Immobilisme - abnégation - trancendance - lien - compromis",
+    "hint_reversed": "Lien difficile - immobilisme paralysant - promesse contraignante - étouffement - abnégation non maîtrisée - sacrifice"
+  },
+  {
+    "id": "13",
+    "numeral": "XIII",
+    "name": "La Mort",
+    "hint_upright": "Transformation - élimination - mort - deuil",
+    "hint_reversed": "Transformation difficile - mort ou deui difficile - Elimination non maîtrisée"
+  },
+  {
+    "id": "14",
+    "numeral": "XIIII",
+    "name": "La Tempérance",
+    "hint_upright": "Vacances - Renaissance - communication - alternance",
+    "hint_reversed": "Renaissance difficile - mauvaise communication - mauvaises vacances ou trop de vacances - ambiguïté - paresse -"
+  },
+  {
+    "id": "15",
+    "numeral": "XV",
+    "name": "Le Diable",
+    "hint_upright": "Plaisir/désir - envoutement - vitalité",
+    "hint_reversed": "Vitalité difficile ou mauvaise - plaisir / désir non maîtrisés"
+  },
+  {
+    "id": "16",
+    "numeral": "XVI",
+    "name": "La Maison Dieu",
+    "hint_upright": "",
+    "hint_reversed": ""
+  },
+  {
+    "id": "17",
+    "numeral": "XVII",
+    "name": "L'Étoile",
+    "hint_upright": "",
+    "hint_reversed": ""
+  },
+  {
+    "id": "18",
+    "numeral": "XVIII",
+    "name": "La Lune",
+    "hint_upright": "",
+    "hint_reversed": ""
+  },
+  {
+    "id": "19",
+    "numeral": "XIX",
+    "name": "Le Soleil",
+    "hint_upright": "",
+    "hint_reversed": ""
+  },
+  {
+    "id": "20",
+    "numeral": "XX",
+    "name": "Le Jugement",
+    "hint_upright": "",
+    "hint_reversed": ""
+  },
+  {
+    "id": "21",
+    "numeral": "XXI",
+    "name": "Le Monde",
+    "hint_upright": "",
+    "hint_reversed": ""
+  }
+]

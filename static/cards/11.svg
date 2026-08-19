@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 1268" role="img" aria-label="STRENGTH">
+  <rect width="700" height="1268" fill="#ffffff"/>
+  <rect x="8.5" y="24.5" width="683" height="1116" fill="none" stroke="#1a1a1a" stroke-width="11"/>
+  <text x="350.0" y="118" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="58" letter-spacing="7" fill="#1a1a1a">VIII</text>
+  <g transform="translate(350,620)"><path transform="translate(-88,-279) scale(0.9929205128679341)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(4,-370) scale(0.8951405576480735)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-215,-327) scale(0.8910336351141313)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(163,-301) scale(0.8004575340731565)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(64,358) scale(0.9596963268778743)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-52,381) scale(0.7209622062779902)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-96,253) scale(0.7813268709657718)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(188,184) scale(0.8295719942005839)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-230,135) scale(1.0440568897957658)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(247,258) scale(0.828067989442367)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(160,291) scale(0.8252894790312537)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-119,-397) scale(0.8885259255063975)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/><path transform="translate(-237,299) scale(0.9763310445048153)" fill="#1a1a1a" stroke="none" d="M0 -20 Q3 -3 20 0 Q3 3 0 20 Q-3 3 -20 0 Q-3 -3 0 -20 Z"/>
+  <path d="M-60 -352 C-60 -392 -20 -392 0 -352 C20 -312 60 -312 60 -352
+           C60 -392 20 -392 0 -352 C-20 -312 -60 -312 -60 -352 Z"
+        fill="none" stroke="#1a1a1a" stroke-width="7"/>
+  <path d="M0.0 -264.0 L45.5 -204.5 L113.4 -236.1 L126.0 -162.2 L200.8 -158.6 L177.7 -87.4 L242.2 -49.4 L188.6 2.9 L228.1 66.5 L156.4 87.9 L161.8 162.6 L88.3 148.2 L58.4 216.9 L-0.0 170.0 L-58.4 216.9 L-88.3 148.2 L-161.8 162.6 L-156.4 87.9 L-228.1 66.5 L-188.6 2.9 L-242.2 -49.4 L-177.7 -87.4 L-200.8 -158.6 L-126.0 -162.2 L-113.4 -236.1 L-45.5 -204.5 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="0" cy="-20" r="172" fill="#ffffff" stroke="#1a1a1a" stroke-width="7"/>
+  <path d="M-138 -122 L-146 -228 L-56 -172" fill="#ffffff" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M138 -122 L146 -228 L56 -172" fill="#ffffff" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="-62" cy="-62" r="19" fill="#1a1a1a"/>
+  <circle cx="62" cy="-62" r="19" fill="#1a1a1a"/>
+  <path d="M-34 12 L0 44 L34 12 Z" fill="#1a1a1a"/>
+  <path d="M-62 74 Q0 118 62 74" fill="none" stroke="#1a1a1a" stroke-width="7"/>
+  <path d="M0 44 V74" fill="none" stroke="#1a1a1a" stroke-width="7"/>
+  <path d="M-88 52 H-166 M-90 84 H-160 M88 52 H166 M90 84 H160"
+        fill="none" stroke="#1a1a1a" stroke-width="5"/>
+  <path d="M-250 300 H250 M-232 334 H232 M-214 368 H214" fill="none" stroke="#1a1a1a" stroke-width="7"/>
+</g>
+  <text x="350.0" y="1230" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="78" letter-spacing="7" fill="#1a1a1a">STRENGTH</text>
+</svg>
