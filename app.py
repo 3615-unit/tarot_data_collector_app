@@ -118,7 +118,11 @@ def connect():
         url = DATABASE_URL
         if url.startswith("postgres://"):  # some hosts still hand out the old scheme
             url = url.replace("postgres://", "postgresql://", 1)
-        return psycopg2.connect(url)
+        # Fail fast on a bad host/URL. Without this psycopg2 has no timeout, so a
+        # mistyped DATABASE_URL hangs the import-time init_db() until gunicorn's
+        # worker times out — which Render reports only as "service won't start",
+        # with no cause. A short timeout turns that into a clear error in the log.
+        return psycopg2.connect(url, connect_timeout=10)
 
     import sqlite3
 
