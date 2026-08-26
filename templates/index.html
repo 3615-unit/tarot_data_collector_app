@@ -131,6 +131,27 @@
   select { font: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
   .links { margin-top: 12px; font-size: 14px; }
   .links a { color: var(--accent); }
+
+  #journalSearch {
+    width: 100%; font: inherit; font-size: 15px; margin: 12px 0 10px;
+    padding: 10px 13px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); outline: none;
+  }
+  #journalSearch:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(185,144,47,.15); }
+  .journal { display: grid; gap: 8px; max-height: 46vh; overflow-y: auto; }
+  .journal-item {
+    text-align: left; width: 100%; cursor: pointer;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 11px 14px; display: block;
+  }
+  .journal-item:hover { border-color: var(--gold); }
+  .journal-item .cartes { font-family: Georgia, serif; font-size: 15.5px; }
+  .journal-item .apercu { font-size: 13px; color: var(--ink-soft); margin-top: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .journal-item .puce { font-size: 12px; margin-left: 6px; }
+  .journal-item .puce.partiel { color: var(--accent); }
+  .journal-item .puce.complet { color: var(--ok); }
+  .journal-empty { color: var(--ink-soft); font-size: 14px; padding: 8px 2px; }
   .hidden { display: none; }
 
   @media (max-width: 520px) {
@@ -177,6 +198,12 @@
     <label><span>Projet / Travail</span><textarea name="projet" rows="3"></textarea></label>
     <label><span>Famille / Entourage</span><textarea name="famille" rows="3"></textarea></label>
   </form>
+
+  <details class="tools" id="journalTool">
+    <summary>Mes cartes remplies — revenir en modifier une</summary>
+    <input type="search" id="journalSearch" placeholder="Chercher une carte…" autocomplete="off">
+    <div class="journal" id="journal"><div class="journal-empty">Chargement…</div></div>
+  </details>
 
   <details class="tools">
     <summary>Aller à une combinaison précise, et exports</summary>
@@ -308,6 +335,8 @@ async function save() {
       el("sess").textContent = ++sessionCount;
     }
     setStatus("Enregistré ✓", "ok");
+    // Keep the journal current if it happens to be open behind the card.
+    if (el("journalTool").open) loadJournal();
     return true;
   } catch (e) {
     setStatus("Non enregistré — réessayez", "err");
@@ -439,6 +468,63 @@ el("goto").addEventListener("click", async () => {
   if (!res.ok) { setStatus("Choisissez deux cartes différentes", "err"); return; }
   const data = await res.json();
   load(data.index);
+});
+
+// ---- journal of filled cards: recognise an entry by its cards, tap to edit
+let journalData = [];
+
+function drawJournal() {
+  const q = el("journalSearch").value.trim().toLowerCase();
+  const list = q
+    ? journalData.filter(it => (it.card_a + " " + it.card_b).toLowerCase().includes(q))
+    : journalData;
+  const box = el("journal");
+  if (!journalData.length) {
+    box.innerHTML = '<div class="journal-empty">Aucune carte remplie pour l’instant.</div>';
+    return;
+  }
+  if (!list.length) {
+    box.innerHTML = '<div class="journal-empty">Aucune carte ne correspond.</div>';
+    return;
+  }
+  box.innerHTML = list.map(it => {
+    const puce = it.complete
+      ? '<span class="puce complet">✓</span>'
+      : '<span class="puce partiel">à finir</span>';
+    const apercu = it.snippet ? `<div class="apercu">${escapeHtml(it.snippet)}</div>` : "";
+    return `<button type="button" class="journal-item" data-index="${it.index}">
+      <div class="cartes">${escapeHtml(it.card_a)} + ${escapeHtml(it.card_b)}${puce}</div>
+      ${apercu}
+    </button>`;
+  }).join("");
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
+async function loadJournal() {
+  try {
+    journalData = await (await fetch("/api/filled")).json();
+  } catch (e) {
+    journalData = [];
+  }
+  drawJournal();
+}
+
+// Load the list the first time she opens the panel, and refresh on reopen so a
+// just-edited card moves to the top.
+el("journalTool").addEventListener("toggle", e => {
+  if (el("journalTool").open) loadJournal();
+});
+el("journalSearch").addEventListener("input", drawJournal);
+el("journal").addEventListener("click", e => {
+  const item = e.target.closest(".journal-item");
+  if (!item) return;
+  el("journalTool").open = false;
+  load(parseInt(item.dataset.index, 10));
 });
 
 // Where to open, in order: an explicit #index in the URL, then the last card

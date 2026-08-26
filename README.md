@@ -30,6 +30,11 @@ then the first combination that is not yet complete. So a bookmark reopens where
 she stopped, and a brand-new device starts at the work front rather than at
 card 0.
 
+To revisit something she already wrote, the *Mes cartes remplies* panel lists
+her entries newest-first — the two card names, a snippet of what she wrote, and
+a ✓ (complete) or *à finir* badge — with a search box to filter by card. Tapping
+one opens that combination to edit. It reads from `/api/filled` and never writes.
+
 All four fields are required: *Suivante* refuses to advance until they are
 filled, and marks the empty ones. The other three ways off a card are not
 validated, by design — *Précédente* goes back, *Passer* moves on without

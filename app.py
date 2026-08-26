@@ -421,6 +421,35 @@ def lookup():
     return jsonify({"index": COMBO_INDEX[key]})
 
 
+@app.route("/api/filled")
+@protected
+def api_filled():
+    """Her journal: every combination she has touched, most recent first.
+
+    Powers the "cartes remplies" list so she can find an entry by its cards and
+    a snippet of what she wrote, and tap straight back to it — no need to know
+    the pair in advance the way the dropdown jump requires.
+    """
+    items = []
+    for row in all_entries():
+        combo = COMBOS[COMBO_INDEX[row["combo_key"]]]
+        snippet = next(
+            (row[f].strip() for f in FIELDS if row[f].strip()), ""
+        )
+        items.append(
+            {
+                "index": COMBO_INDEX[row["combo_key"]],
+                "card_a": label_for(row["card_a"], row["orient_a"]),
+                "card_b": label_for(row["card_b"], row["orient_b"]),
+                "complete": all(row[f].strip() for f in FIELDS),
+                "snippet": snippet[:80],
+                "updated_at": row["updated_at"],
+            }
+        )
+    items.sort(key=lambda it: it["updated_at"] or "", reverse=True)
+    return jsonify(items)
+
+
 @app.route("/api/cards")
 @protected
 def api_cards():
