@@ -171,6 +171,45 @@ def init_db():
             """
         )
 
+        # `entries` stores card codes (00-21) so it never depends on the French
+        # names. This reference table plus the `combinations` view below exist
+        # only so the database is legible when browsed directly (in Neon, say):
+        # open `combinations` and every row shows real names and orientations.
+        # The app itself never reads either — it keeps using `entries`.
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS cards (code TEXT PRIMARY KEY, name TEXT NOT NULL)"
+        )
+        for card in CARDS:
+            if using_postgres():
+                cur.execute(
+                    "INSERT INTO cards (code, name) VALUES (%s, %s) "
+                    "ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name",
+                    (card["id"], card["name"]),
+                )
+            else:
+                cur.execute(
+                    "INSERT OR REPLACE INTO cards (code, name) VALUES (?, ?)",
+                    (card["id"], card["name"]),
+                )
+
+        # Rebuilt each boot so a renamed card flows through. DROP + CREATE works
+        # on both SQLite and Postgres; '' is the SQL escape for a literal quote.
+        cur.execute("DROP VIEW IF EXISTS combinations")
+        cur.execute(
+            """
+            CREATE VIEW combinations AS
+            SELECT e.combo_key,
+                   ca.name AS carte_1,
+                   CASE e.orient_a WHEN 'R' THEN 'renversée' ELSE 'à l''endroit' END AS orientation_1,
+                   cb.name AS carte_2,
+                   CASE e.orient_b WHEN 'R' THEN 'renversée' ELSE 'à l''endroit' END AS orientation_2,
+                   e.amour, e.argent, e.projet, e.famille, e.updated_at
+            FROM entries e
+            JOIN cards ca ON ca.code = e.card_a
+            JOIN cards cb ON cb.code = e.card_b
+            """
+        )
+
 
 def fetch_entry(combo_key):
     with db() as conn:
