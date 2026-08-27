@@ -82,6 +82,29 @@ SQLite file there will lose the data. Point `DATABASE_URL` at a managed Postgres
 Free web tiers also sleep after inactivity, which makes the first page load of
 the day slow (~1 minute). That is the tier, not the app.
 
+## Daily email report
+
+At the end of each day an email can go out summarising what Corinne completed
+that day — the count, each pairing, and the four fields she wrote. It is sent to
+whatever addresses `REPORT_TO` lists (her, you, or both).
+
+The endpoint is `GET /tasks/daily-report`, guarded by `REPORT_TOKEN` (not the
+login). `?dry=1` returns the rendered report **without sending** — safe to open
+in a browser to preview. `?date=YYYY-MM-DD` reports a specific local day. An
+empty day sends nothing rather than nagging.
+
+Sending uses [Resend](https://resend.com) (~100 emails/day free) via its REST
+API — no extra Python dependency. Set `RESEND_API_KEY`, `REPORT_FROM` (a sender
+on a domain you have verified with Resend) and `REPORT_TO`. With those unset the
+endpoint still previews but refuses to send.
+
+The daily trigger is a **free GitHub Actions schedule** (`.github/workflows/
+daily-report.yml`), so no always-on server is needed. Add the app URL's
+`REPORT_TOKEN` as a repository secret (Settings → Secrets and variables →
+Actions). Cron runs in UTC with no daylight-saving shift, so 19:00 UTC is 21:00
+in Paris in summer, 20:00 in winter. The workflow also has a manual *Run
+workflow* button for testing.
+
 ## Getting the data out
 
 - `/export.csv` — one row per filled combination, UTF-8 with a BOM so Numbers

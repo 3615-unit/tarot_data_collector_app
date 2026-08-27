@@ -8,14 +8,18 @@ Storage is SQLite locally, Postgres when DATABASE_URL is set.
 """
 
 import csv
+import hmac
 import io
 import json
 import os
+import urllib.error
+import urllib.request
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, time as dtime, timezone
 from functools import wraps
 from pathlib import Path
 from random import Random
+from zoneinfo import ZoneInfo
 
 from flask import (
     Flask,
@@ -36,6 +40,14 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 ACCESS_CODE = os.environ.get("ACCESS_CODE", "").strip()
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 SQLITE_PATH = os.environ.get("SQLITE_PATH", str(ROOT / "combinaisons.db"))
+
+# Daily email report (see /tasks/daily-report). All optional: with none set the
+# endpoint still renders a dry-run report but refuses to send.
+REPORT_TOKEN = os.environ.get("REPORT_TOKEN", "").strip()      # shared secret the scheduler sends
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()  # https://resend.com, ~100 free/day
+REPORT_FROM = os.environ.get("REPORT_FROM", "").strip()        # verified sender, e.g. Combinaisons <combinaisons@ton-domaine>
+REPORT_TO = os.environ.get("REPORT_TO", "").strip()            # comma-separated recipients
+REPORT_TZ = os.environ.get("REPORT_TZ", "Europe/Paris").strip()
 
 FIELDS = ("amour", "argent", "projet", "famille")
 ORIENTATIONS = ("U", "R")
@@ -532,6 +544,164 @@ def export_json():
         mimetype="application/json; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=combinaisons.json"},
     )
+
+
+# ---------------------------------------------------------------- daily report
+
+FIELD_LABELS = {
+    "amour": "Amour",
+    "argent": "Argent",
+    "projet": "Projet / Travail",
+    "famille": "Famille / Entourage",
+}
+
+
+def report_tz():
+    try:
+        return ZoneInfo(REPORT_TZ)
+    except Exception:
+        return timezone.utc
+
+
+def day_report(target_date=None):
+    """What she completed on `target_date` (her local day; default: today).
+
+    A row counts as "today" if its last save falls inside that local day. Only
+    fully-filled combinations are listed — a half-entry is still in progress.
+    """
+    tz = report_tz()
+    day = target_date or datetime.now(tz).date()
+    start_utc = datetime.combine(day, dtime.min, tz).astimezone(timezone.utc)
+    end_utc = datetime.combine(day, dtime.max, tz).astimezone(timezone.utc)
+
+    items = []
+    for row in all_entries():
+        stamp = row["updated_at"]
+        if not stamp:
+            continue
+        when = datetime.fromisoformat(stamp)
+        if not (start_utc <= when <= end_utc):
+            continue
+        if not all(row[f].strip() for f in FIELDS):
+            continue
+        items.append(
+            {
+                "cards": f'{label_for(row["card_a"], row["orient_a"])}'
+                f' + {label_for(row["card_b"], row["orient_b"])}',
+                "fields": {f: row[f].strip() for f in FIELDS},
+                "when": when.astimezone(tz).strftime("%H:%M"),
+            }
+        )
+    items.sort(key=lambda it: it["when"])
+    return {"date": day.isoformat(), "count": len(items), "items": items}
+
+
+def render_report(report):
+    """Plain-text and HTML bodies for the day's work."""
+    d = report["date"]
+    n = report["count"]
+    head = f"{n} carte{'s' if n != 1 else ''} remplie{'s' if n != 1 else ''} le {d}"
+
+    text = [f"Bonjour Corinne,", "", head, ""]
+    for it in report["items"]:
+        text.append(f'• {it["cards"]}  ({it["when"]})')
+        for f in FIELDS:
+            text.append(f'    {FIELD_LABELS[f]} : {it["fields"][f]}')
+        text.append("")
+    text.append("Bravo pour ton travail. 🌙")
+
+    esc = lambda s: (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    html = [
+        '<div style="font-family:Georgia,serif;color:#2f2b3d;max-width:640px;margin:auto">',
+        '<p>Bonjour Corinne,</p>',
+        f'<p style="font-size:18px"><strong>{esc(head)}</strong></p>',
+    ]
+    for it in report["items"]:
+        html.append(
+            '<div style="border:1px solid #ded1b8;border-radius:10px;'
+            'padding:12px 16px;margin:12px 0;background:#fbf6ec">'
+        )
+        html.append(
+            f'<div style="font-size:16px;margin-bottom:6px">'
+            f'<strong>{esc(it["cards"])}</strong> '
+            f'<span style="color:#6c6580;font-size:13px">{it["when"]}</span></div>'
+        )
+        for f in FIELDS:
+            html.append(
+                f'<div style="margin:4px 0"><span style="color:#6c6580">'
+                f'{FIELD_LABELS[f]} :</span> {esc(it["fields"][f])}</div>'
+            )
+        html.append("</div>")
+    html.append('<p>Bravo pour ton travail. 🌙</p></div>')
+
+    subject = f"Combinaisons — {n} carte{'s' if n != 1 else ''} le {d}"
+    return subject, "\n".join(text), "\n".join(html)
+
+
+def send_email(subject, text_body, html_body):
+    """Send via Resend's REST API using only the standard library."""
+    if not (RESEND_API_KEY and REPORT_FROM and REPORT_TO):
+        return False, "email not configured (RESEND_API_KEY / REPORT_FROM / REPORT_TO)"
+    recipients = [addr.strip() for addr in REPORT_TO.split(",") if addr.strip()]
+    payload = json.dumps(
+        {
+            "from": REPORT_FROM,
+            "to": recipients,
+            "subject": subject,
+            "text": text_body,
+            "html": html_body,
+        }
+    ).encode("utf-8")
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return True, resp.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as exc:
+        return False, f"{exc.code} {exc.read().decode('utf-8', 'replace')}"
+    except Exception as exc:  # network, DNS, timeout
+        return False, str(exc)
+
+
+@app.route("/tasks/daily-report")
+def daily_report():
+    """Machine-triggered end-of-day email. Guarded by REPORT_TOKEN, not login.
+
+    ?dry=1 renders the report and returns it without sending — safe to open in a
+    browser to preview. ?date=YYYY-MM-DD reports a specific local day.
+    """
+    supplied = request.args.get("token", "")
+    if not REPORT_TOKEN or not hmac.compare_digest(supplied, REPORT_TOKEN):
+        return jsonify({"error": "unauthorized"}), 401
+
+    target = None
+    if request.args.get("date"):
+        try:
+            target = datetime.strptime(request.args["date"], "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({"error": "date invalide (YYYY-MM-DD)"}), 400
+
+    report = day_report(target)
+    subject, text_body, html_body = render_report(report)
+
+    if request.args.get("dry"):
+        return jsonify({"would_send": report["count"] > 0, "subject": subject,
+                        "report": report, "text": text_body})
+
+    # Nothing to celebrate on an empty day — skip rather than nag.
+    if report["count"] == 0:
+        return jsonify({"sent": False, "count": 0, "reason": "no cards today"})
+
+    ok, detail = send_email(subject, text_body, html_body)
+    status = 200 if ok else 502
+    return jsonify({"sent": ok, "count": report["count"], "detail": detail}), status
 
 
 init_db()

@@ -1,0 +1,28 @@
+name: Rapport quotidien
+
+# End-of-day email to Corinne. GitHub's scheduler is free and needs no server.
+# Cron is UTC and does not shift for daylight saving, so 19:00 UTC lands at
+# 21:00 in Paris in summer and 20:00 in winter — evening either way.
+on:
+  schedule:
+    - cron: "0 19 * * *"
+  workflow_dispatch: {}   # a "Run workflow" button for manual sends / testing
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the report endpoint
+        env:
+          APP_URL: https://tarot-data-collector-app.onrender.com
+          REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}
+        run: |
+          if [ -z "$REPORT_TOKEN" ]; then
+            echo "REPORT_TOKEN secret is not set — add it in repo Settings → Secrets."
+            exit 1
+          fi
+          # Render free tier sleeps; the first hit may cold-start (~50s), so allow
+          # a generous timeout and a couple of retries.
+          curl -fsS -m 120 --retry 3 --retry-delay 30 --retry-all-errors \
+            "$APP_URL/tasks/daily-report?token=$REPORT_TOKEN"
+          echo
