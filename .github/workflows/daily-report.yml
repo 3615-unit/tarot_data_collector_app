@@ -18,8 +18,9 @@ jobs:
           REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}
         run: |
           if [ -z "$REPORT_TOKEN" ]; then
-            echo "REPORT_TOKEN secret is not set — add it in repo Settings → Secrets."
-            exit 1
+            echo "REPORT_TOKEN secret not set — nothing to send yet. Add it in"
+            echo "repo Settings → Secrets and variables → Actions to enable the report."
+            exit 0   # skip cleanly so an unconfigured schedule does not email failures nightly
           fi
           # Render free tier sleeps; the first hit may cold-start (~50s), so allow
           # a generous timeout and a couple of retries.
