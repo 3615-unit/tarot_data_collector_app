@@ -36,15 +36,12 @@ her entries newest-first — the two card names, a snippet of what she wrote, an
 a ✓ (complete) or *à finir* badge — with a search box to filter by card. Tapping
 one opens that combination to edit. It reads from `/api/filled` and never writes.
 
-All four fields are required: *Suivante* refuses to advance until they are
-filled, and marks the empty ones. The other three ways off a card are not
-validated, by design — *Précédente* goes back, *Passer* moves on without
-answering, and *Prochaine vide* jumps to the next combination that is not yet
-complete (a half-filled one counts as unfinished).
-
-The footer ranks the four by weight: *Suivante* is the filled dark button,
-*Précédente* the outlined one beside it, and *Passer* / *Prochaine vide* sit
-behind a divider as quiet text buttons.
+The bottom bar is deliberately small: **Précédente**, **Suivante**, and a
+**go-to-card** number box. *Suivante* requires all four fields (it marks the
+empty ones and refuses otherwise), then jumps to the next card still needing
+work — skipping any already complete. *Précédente* steps back one card, and the
+go-to box jumps straight to any card by the number shown in the "Carte N / 924"
+counter; neither is validated, so they are how she leaves a card unfinished.
 
 ## Compliments
 

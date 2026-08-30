@@ -103,10 +103,18 @@
     font-size: 13px; padding: 6px 8px;
   }
   button.ghost:hover { border-color: transparent; color: var(--ink); text-decoration: underline; }
-  .aux {
-    display: flex; align-items: center; gap: 2px;
+  .aller {
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
     margin-left: 16px; padding-left: 16px; border-left: 1px solid var(--line);
+    font-size: 14px; color: var(--ink-soft);
   }
+  .aller input {
+    width: 72px; font: inherit; font-size: 16px; text-align: center;
+    padding: 8px 6px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink);
+  }
+  .aller input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(185,144,47,.15); }
+  .aller-total { color: var(--ink-soft); }
   .status { margin-left: auto; font-size: 13px; color: var(--ink-soft); min-width: 120px; text-align: right; }
   .status.ok { color: var(--ok); }
   .status.err { color: var(--accent); }
@@ -215,7 +223,8 @@
     .footrow button.secondary { padding: 10px 12px; font-size: 14px; }
     .footrow button.primary { padding: 11px 16px; font-size: 15px; }
     .footrow button.ghost { padding: 5px 6px; font-size: 12px; }
-    .aux { margin-left: auto; padding-left: 10px; }
+    .aller { margin-left: auto; padding-left: 10px; gap: 5px; font-size: 12px; }
+    .aller input { width: 60px; font-size: 15px; padding: 7px 4px; }
     .status { width: 100%; min-width: 0; }
     .bravo { bottom: 150px; font-size: 20px; padding: 16px 24px; }
   }
@@ -291,10 +300,12 @@
   <div class="footrow">
     <button type="button" id="prev" class="secondary">← Précédente</button>
     <button type="button" id="next" class="primary">Suivante →</button>
-    <div class="aux">
-      <button type="button" id="skip" class="ghost">Passer</button>
-      <button type="button" id="empty" class="ghost">Prochaine vide</button>
-    </div>
+    <form class="aller" id="allerForm">
+      <label for="allerNum">Aller à</label>
+      <input type="number" id="allerNum" min="1" max="{{ total }}" inputmode="numeric" autocomplete="off">
+      <span class="aller-total">/ {{ total }}</span>
+      <button type="submit" class="ghost">OK</button>
+    </form>
     <div class="status" id="status">&nbsp;</div>
   </div>
 </footer>
@@ -338,6 +349,7 @@ function render(data) {
   // A plain position counter is clearer than "Série 4 sur 4" — it shows exactly
   // where in the deck this card sits.
   el("series").textContent = `Carte ${data.index + 1} / ${TOTAL}`;
+  el("allerNum").value = data.index + 1;
   for (const side of ["a", "b"]) {
     const c = data[side];
     const up = side.toUpperCase();
@@ -537,7 +549,9 @@ function fermerFete() {
 
 el("fete").addEventListener("click", fermerFete);
 
-// Précédente, Passer and Prochaine vide are not validated — only Suivante is.
+// Suivante requires the four fields, then jumps to the next card still needing
+// work (skipping any already done). Précédente and the go-to box are not
+// validated — they are how she leaves a card she does not want to finish now.
 async function goNext() {
   const missing = firstEmpty();
   if (missing) {
@@ -546,8 +560,15 @@ async function goNext() {
     inputs[missing].focus();
     return;
   }
-  // Only once the four answers are saved and the next card is up.
-  if (await load(current.index + 1)) complimenter();
+  if (!await flush()) return;
+  const res = await fetch(`/api/next-empty?from=${current.index}`);
+  const data = await res.json();
+  if (!Number.isInteger(data.index)) {
+    setStatus("Tout est rempli ✨", "ok");
+    complimenter();
+    return;
+  }
+  if (await load(data.index)) complimenter();
 }
 
 FIELDS.forEach(f => {
@@ -564,15 +585,16 @@ FIELDS.forEach(f => {
 el("next").addEventListener("click", goNext);
 el("prev").addEventListener("click", () => load(current.index - 1));
 
-// Passer and Prochaine vide deliberately skip the required-fields check: they
-// exist precisely to leave a combination she does not want to answer now.
-el("skip").addEventListener("click", () => load(current.index + 1));
-el("empty").addEventListener("click", async () => {
-  if (!await flush()) return;
-  const res = await fetch(`/api/next-empty?from=${current.index}`);
-  const data = await res.json();
-  if (data.index === null) { setStatus("Tout est rempli ✨", "ok"); return; }
-  load(data.index);
+// Go to any card by its number. The number matches the "Carte N / TOTAL" counter
+// (1-based), so what she reads is what she types. Not validated: this is how she
+// leaves the current card, finished or not.
+el("allerForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  let n = parseInt(el("allerNum").value, 10);
+  if (!Number.isInteger(n)) { el("allerNum").value = current.index + 1; return; }
+  n = Math.min(TOTAL, Math.max(1, n));
+  el("allerNum").blur();
+  load(n - 1);
 });
 
 document.addEventListener("keydown", e => {
