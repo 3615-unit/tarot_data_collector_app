@@ -133,6 +133,10 @@
     backdrop-filter: blur(3px); padding: 24px; overflow: hidden;
     opacity: 0; transition: opacity .4s ease;
   }
+  /* Author `display:flex` overrides the [hidden] attribute's display:none, which
+     would leave an invisible full-screen overlay swallowing every click and
+     keystroke. This restores the hide. */
+  .fete[hidden] { display: none; }
   .fete.vu { opacity: 1; }
   .fete-hearts { position: absolute; inset: 0; pointer-events: none; }
   .fete-hearts span {
