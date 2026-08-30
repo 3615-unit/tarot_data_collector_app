@@ -52,6 +52,17 @@ Corinne appears above the buttons for a couple of seconds. They are drawn from a
 bag in `templates/index.html` (`COMPLIMENTS`), so none repeats until the whole
 list has had its turn — add or reword them freely there.
 
+## The little party (every 50 cards)
+
+Each time the count of completed cards crosses a multiple of 50, a full-screen
+celebration appears: a photo, floating hearts, "Je t'aime, Corinne" and the
+signature "— Richard Lee". It fires once per milestone (per browser), never on
+reloads or when editing an older card, and a tap or ~9s dismisses it.
+
+Photos live in `static/richard/` (`.jpg`/`.png`) and one is chosen at random
+each time. With the folder empty the party still runs, showing a heart where the
+photo would be. `FETE_TOUS` in `templates/index.html` sets the interval (50).
+
 ## Running it locally
 
 ```bash

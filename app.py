@@ -75,6 +75,24 @@ def card_image(card_id):
 CARD_IMAGES = {card_id: card_image(card_id) for card_id in CARD_IDS}
 
 
+def richard_images():
+    """Photos for the every-50-cards celebration, from static/richard/.
+
+    Not shipped with the app: drop the photos in that folder and one is chosen
+    at random each time. Empty folder and the party still runs, just with a
+    heart where the photo would be.
+    """
+    folder = ROOT / "static" / "richard"
+    if not folder.is_dir():
+        return []
+    exts = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+    return [
+        f"richard/{p.name}"
+        for p in sorted(folder.iterdir())
+        if p.suffix.lower() in exts
+    ]
+
+
 # Fixed forever. A position is what the resume pointer, the #index in the URL
 # and any shared link all refer to, so re-rolling this seed would drop her on a
 # different card and break every saved link. Stored rows are keyed by combo_key,
@@ -372,7 +390,8 @@ def progress_summary(known=None):
 @app.route("/")
 @protected
 def index():
-    return render_template("index.html", total=TOTAL, fields=FIELDS)
+    richard = [url_for("static", filename=name) for name in richard_images()]
+    return render_template("index.html", total=TOTAL, fields=FIELDS, richard=richard)
 
 
 @app.route("/api/combo/<int:index>")

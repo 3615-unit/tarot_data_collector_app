@@ -125,6 +125,56 @@
   }
   .bravo.vu { opacity: 1; transform: translate(-50%, 0); }
 
+  /* ---- the every-50-cards party */
+  .fete {
+    position: fixed; inset: 0; z-index: 60;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 40%, rgba(125,74,74,.30), rgba(47,43,61,.72));
+    backdrop-filter: blur(3px); padding: 24px; overflow: hidden;
+    opacity: 0; transition: opacity .4s ease;
+  }
+  .fete.vu { opacity: 1; }
+  .fete-hearts { position: absolute; inset: 0; pointer-events: none; }
+  .fete-hearts span {
+    position: absolute; bottom: -40px; font-size: 28px; opacity: 0;
+    animation: monte var(--dur, 4s) ease-in var(--delay, 0s) infinite;
+  }
+  @keyframes monte {
+    0%   { transform: translateY(0) scale(.8) rotate(0deg); opacity: 0; }
+    12%  { opacity: .95; }
+    100% { transform: translateY(-102vh) scale(1.1) rotate(var(--spin, 20deg)); opacity: 0; }
+  }
+  .fete-carte {
+    position: relative; z-index: 1; text-align: center;
+    transform: scale(.7); transition: transform .45s cubic-bezier(.2,1.3,.4,1);
+    max-width: 92vw;
+  }
+  .fete.vu .fete-carte { transform: scale(1); }
+  .fete-photo {
+    display: inline-block; position: relative; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,.45); border: 4px solid #fbf6ec; background: #fbf6ec;
+  }
+  .fete-photo img { display: block; max-height: 56vh; max-width: 86vw; object-fit: cover; }
+  .fete-photo .fete-coeur { display: none; font-size: 120px; padding: 40px 60px; }
+  .fete-photo.vide img { display: none; }
+  .fete-photo.vide .fete-coeur { display: block; }
+  .fete-mot {
+    margin-top: 22px; font-family: Georgia, serif; color: #fff7ec;
+    font-size: clamp(28px, 8vw, 52px); text-shadow: 0 2px 14px rgba(0,0,0,.5);
+  }
+  .fete-signe {
+    margin-top: 8px; font-family: Georgia, serif; font-style: italic;
+    color: #f2d9c9; font-size: clamp(17px, 4.5vw, 26px);
+  }
+  .fete-fermer {
+    position: absolute; bottom: 26px; z-index: 1;
+    color: rgba(255,247,236,.75); font-size: 13px; letter-spacing: .5px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fete-hearts span { animation: none; opacity: .9; }
+    .fete-carte { transition: none; }
+  }
+
   .tools { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 14px; }
   .tools summary { cursor: pointer; font-size: 14px; color: var(--ink-soft); }
   .jump { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
@@ -223,6 +273,16 @@
 
 <div class="bravo" id="bravo" role="status" aria-live="polite"></div>
 
+<div class="fete" id="fete" hidden data-photos='{{ richard|tojson }}'>
+  <div class="fete-hearts" id="feteHearts" aria-hidden="true"></div>
+  <div class="fete-carte">
+    <div class="fete-photo"><img id="feteImg" alt="Richard Lee"><span class="fete-coeur">💗</span></div>
+    <div class="fete-mot">Je t'aime, Corinne</div>
+    <div class="fete-signe">— Richard Lee</div>
+  </div>
+  <div class="fete-fermer">toucher pour continuer</div>
+</div>
+
 <footer>
   <div class="footrow">
     <button type="button" id="prev" class="secondary">← Précédente</button>
@@ -292,6 +352,7 @@ function render(data) {
   });
   dirty = false;
   renderProgress(data.progress);
+  paletteFete(data.progress.complete);
   setStatus(hasContent(data.values || {}) ? "Déjà remplie" : "");
   history.replaceState(null, "", "#" + data.index);
   localStorage.setItem("derniere", data.index);
@@ -330,6 +391,7 @@ async function save() {
     const data = await res.json();
     dirty = false;
     renderProgress(data.progress);
+    paletteFete(data.progress.complete);
     if (hasContent(payload) && !savedThisSession.has(current.key)) {
       savedThisSession.add(current.key);
       el("sess").textContent = ++sessionCount;
@@ -393,6 +455,8 @@ let sac = [];
 let bravoTimer;
 
 function complimenter() {
+  // A party takes precedence over the small compliment, so they never overlap.
+  if (el("fete").classList.contains("vu")) return;
   if (!sac.length) sac = COMPLIMENTS.slice();
   const [mot] = sac.splice(Math.floor(Math.random() * sac.length), 1);
   const boite = el("bravo");
@@ -401,6 +465,72 @@ function complimenter() {
   clearTimeout(bravoTimer);
   bravoTimer = setTimeout(() => boite.classList.remove("vu"), 2600);
 }
+
+// ---- little party every 50 completed cards
+const FETE_TOUS = 50;
+const FETE_PHOTOS = JSON.parse(el("fete").dataset.photos || "[]");
+let feteTimer, feteHideTimer, feteShowTimer;
+
+// The "tier" is how many 50s she has passed. We remember the highest one already
+// celebrated (per browser) so the party fires once when she crosses each 50 and
+// never again — not on reloads, not when editing an older card.
+function paletteFete(complete) {
+  const tier = Math.floor(complete / FETE_TOUS);
+  const connu = parseInt(localStorage.getItem("feteTier") ?? "-1", 10);
+  if (connu < 0) { localStorage.setItem("feteTier", tier); return; }  // first sight: baseline only
+  if (tier > connu) {
+    localStorage.setItem("feteTier", tier);
+    if (complete > 0) fete();
+  }
+}
+
+function fete() {
+  const box = el("fete");
+  const photo = box.querySelector(".fete-photo");
+  const img = el("feteImg");
+  if (FETE_PHOTOS.length) {
+    img.src = FETE_PHOTOS[Math.floor(Math.random() * FETE_PHOTOS.length)];
+    photo.classList.remove("vide");
+  } else {
+    photo.classList.add("vide");   // no photo yet: a big heart stands in
+  }
+
+  // scatter floating hearts
+  const coeurs = ["💗", "💖", "❤️", "💘", "💕"];
+  const champ = el("feteHearts");
+  champ.innerHTML = "";
+  for (let i = 0; i < 26; i++) {
+    const s = document.createElement("span");
+    s.textContent = coeurs[i % coeurs.length];
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.setProperty("--dur", (3 + Math.random() * 3).toFixed(2) + "s");
+    s.style.setProperty("--delay", (Math.random() * 3).toFixed(2) + "s");
+    s.style.setProperty("--spin", (Math.random() * 80 - 40).toFixed(0) + "deg");
+    s.style.fontSize = (20 + Math.random() * 26).toFixed(0) + "px";
+    champ.appendChild(s);
+  }
+
+  el("bravo").classList.remove("vu");   // hide any small compliment underneath
+  clearTimeout(feteTimer);
+  clearTimeout(feteHideTimer);
+  clearTimeout(feteShowTimer);
+  box.hidden = false;
+  // setTimeout, not requestAnimationFrame: rAF is paused in a background tab,
+  // which would leave the overlay stuck at opacity 0.
+  feteShowTimer = setTimeout(() => box.classList.add("vu"), 30);
+  feteTimer = setTimeout(fermerFete, 9000);
+}
+
+function fermerFete() {
+  const box = el("fete");
+  clearTimeout(feteTimer);
+  clearTimeout(feteHideTimer);
+  clearTimeout(feteShowTimer);
+  box.classList.remove("vu");
+  feteHideTimer = setTimeout(() => { box.hidden = true; }, 450);
+}
+
+el("fete").addEventListener("click", fermerFete);
 
 // Précédente, Passer and Prochaine vide are not validated — only Suivante is.
 async function goNext() {
