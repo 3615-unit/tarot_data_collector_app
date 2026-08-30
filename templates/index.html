@@ -45,7 +45,7 @@
 
   main { max-width: 900px; margin: 0 auto; padding: 22px 20px 140px; }
 
-  .series { text-align: center; color: var(--ink-soft); font-size: 13px; letter-spacing: .8px; text-transform: uppercase; }
+  .series { text-align: center; color: var(--ink-soft); font-size: 15px; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
 
   .spread { display: flex; gap: 18px; justify-content: center; align-items: flex-start; margin: 12px 0 22px; }
   .card { flex: 1 1 0; max-width: 168px; text-align: center; }
@@ -335,7 +335,9 @@ function renderProgress(p) {
 
 function render(data) {
   current = data;
-  el("series").textContent = `Série ${data.phase + 1} sur 4 — ${data.phase_label}`;
+  // A plain position counter is clearer than "Série 4 sur 4" — it shows exactly
+  // where in the deck this card sits.
+  el("series").textContent = `Carte ${data.index + 1} / ${TOTAL}`;
   for (const side of ["a", "b"]) {
     const c = data[side];
     const up = side.toUpperCase();
@@ -359,7 +361,6 @@ function render(data) {
   paletteFete(data.progress.complete);
   setStatus(hasContent(data.values || {}) ? "Déjà remplie" : "");
   history.replaceState(null, "", "#" + data.index);
-  localStorage.setItem("derniere", data.index);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -661,17 +662,14 @@ el("journal").addEventListener("click", e => {
   load(parseInt(item.dataset.index, 10));
 });
 
-// Where to open, in order: an explicit #index in the URL, then the last card
-// she was on in this browser, then the first combination still to finish. So a
-// bookmark reopens where she stopped instead of back at Le Fou.
+// Always open on the smallest-numbered card she has not finished, so she never
+// has to hunt for where she was — she simply picks up at the first gap. An
+// explicit #index in the URL still wins, so a reload stays on the current card
+// and a shared link lands where it points.
 (async () => {
   const duLien = parseInt(location.hash.slice(1), 10);
   if (Number.isInteger(duLien)) return load(duLien);
 
-  const gardee = parseInt(localStorage.getItem("derniere"), 10);
-  if (Number.isInteger(gardee)) return load(gardee);
-
-  // First visit on this device: start at the work front, not at card 0.
   try {
     const res = await fetch("/api/next-empty?from=-1");
     const data = await res.json();

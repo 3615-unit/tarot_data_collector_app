@@ -24,11 +24,12 @@ cannot corrupt data that already exists — but it would strand every saved link
 Nothing has to be finished in one sitting: progress is stored per combination,
 and the dropdowns jump straight to a specific pair.
 
-Opening the page picks a starting card in this order: an explicit `#index` in
-the URL, then the last card visited in that browser (kept in `localStorage`),
-then the first combination that is not yet complete. So a bookmark reopens where
-she stopped, and a brand-new device starts at the work front rather than at
-card 0.
+Opening the page always lands on the smallest-numbered card that is not yet
+complete, so she never has to hunt for where she was — she just picks up at the
+first gap. An explicit `#index` in the URL still wins, so reloading stays on the
+current card and a shared link lands where it points. Above the two cards a plain
+counter (`Carte 22 / 924`) shows the position of the current card, and the header
+keeps the completed count (`… / 924 remplies`).
 
 To revisit something she already wrote, the *Mes cartes remplies* panel lists
 her entries newest-first — the two card names, a snippet of what she wrote, and
