@@ -492,6 +492,10 @@ function complimenter() {
 
 // ---- little party every 50 completed cards
 const FETE_TOUS = 50;
+// One-time make-up: her real 50th party ran the old, broken version (no photos),
+// so fire the new one once on her next completed card. Guaranteed to happen even
+// if she has already nudged a little past 51 before this reaches her.
+const FETE_RATTRAPAGE = 51;
 const FETE_PHOTOS = JSON.parse(el("fete").dataset.photos || "[]");
 let feteTimer, feteHideTimer, feteShowTimer;
 
@@ -499,6 +503,14 @@ let feteTimer, feteHideTimer, feteShowTimer;
 // celebrated (per browser) so the party fires once when she crosses each 50 and
 // never again — not on reloads, not when editing an older card.
 function paletteFete(complete) {
+  // The make-up party, exactly once, then it stays out of the way for good.
+  if (complete >= FETE_RATTRAPAGE && localStorage.getItem("feteRattrapage") !== "fait") {
+    localStorage.setItem("feteRattrapage", "fait");
+    localStorage.setItem("feteTier", Math.floor(complete / FETE_TOUS)); // keep 100+ on track
+    fete();
+    return;
+  }
+
   const tier = Math.floor(complete / FETE_TOUS);
   const connu = parseInt(localStorage.getItem("feteTier") ?? "-1", 10);
   if (connu < 0) { localStorage.setItem("feteTier", tier); return; }  // first sight: baseline only
