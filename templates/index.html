@@ -137,46 +137,53 @@
   .fete {
     position: fixed; inset: 0; z-index: 60;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: radial-gradient(circle at 50% 40%, rgba(125,74,74,.30), rgba(47,43,61,.72));
-    backdrop-filter: blur(3px); padding: 24px; overflow: hidden;
-    opacity: 0; transition: opacity .4s ease;
+    background: radial-gradient(circle at 50% 38%, rgba(150,70,80,.45), rgba(40,30,45,.85));
+    backdrop-filter: blur(4px); padding: 24px; overflow: hidden;
+    opacity: 0; transition: opacity .5s ease;
   }
   /* Author `display:flex` overrides the [hidden] attribute's display:none, which
      would leave an invisible full-screen overlay swallowing every click and
      keystroke. This restores the hide. */
   .fete[hidden] { display: none; }
   .fete.vu { opacity: 1; }
-  .fete-hearts { position: absolute; inset: 0; pointer-events: none; }
+  .fete-hearts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
   .fete-hearts span {
-    position: absolute; bottom: -40px; font-size: 28px; opacity: 0;
-    animation: monte var(--dur, 4s) ease-in var(--delay, 0s) infinite;
+    position: absolute; bottom: -60px; opacity: 0; will-change: transform, opacity;
+    animation: monte var(--dur, 6s) linear var(--delay, 0s) infinite;
   }
   @keyframes monte {
-    0%   { transform: translateY(0) scale(.8) rotate(0deg); opacity: 0; }
-    12%  { opacity: .95; }
-    100% { transform: translateY(-102vh) scale(1.1) rotate(var(--spin, 20deg)); opacity: 0; }
+    0%   { transform: translateY(0) translateX(0) scale(.6) rotate(0); opacity: 0; }
+    10%  { opacity: .95; }
+    50%  { transform: translateY(-52vh) translateX(var(--sway,20px)) scale(1) rotate(var(--r1,15deg)); }
+    100% { transform: translateY(-108vh) translateX(0) scale(1.15) rotate(var(--r2,-15deg)); opacity: 0; }
   }
   .fete-carte {
-    position: relative; z-index: 1; text-align: center;
-    transform: scale(.7); transition: transform .45s cubic-bezier(.2,1.3,.4,1);
-    max-width: 92vw;
+    position: relative; z-index: 1; text-align: center; max-width: 92vw;
+    display: flex; flex-direction: column; align-items: center;
+    transform: scale(.4); opacity: 0;
   }
-  .fete.vu .fete-carte { transform: scale(1); }
+  .fete.vu .fete-carte { animation: pop .7s cubic-bezier(.18,1.5,.5,1) .15s forwards; }
+  @keyframes pop { to { transform: scale(1); opacity: 1; } }
   .fete-photo {
-    display: inline-block; position: relative; border-radius: 18px; overflow: hidden;
-    box-shadow: 0 18px 50px rgba(0,0,0,.45); border: 4px solid #fbf6ec; background: #fbf6ec;
+    position: relative; border-radius: 20px; overflow: hidden; background: #fbf6ec;
+    border: 5px solid #fff7ec;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 60px rgba(220,120,130,.5);
+    animation: flotte 4s ease-in-out infinite;
   }
-  .fete-photo img { display: block; max-height: 56vh; max-width: 86vw; object-fit: cover; }
+  @keyframes flotte { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .fete-photo img { display: block; max-height: 56vh; max-width: 86vw; object-fit: contain; }
   .fete-photo .fete-coeur { display: none; font-size: 120px; padding: 40px 60px; }
   .fete-photo.vide img { display: none; }
   .fete-photo.vide .fete-coeur { display: block; }
   .fete-mot {
-    margin-top: 22px; font-family: Georgia, serif; color: #fff7ec;
-    font-size: clamp(28px, 8vw, 52px); text-shadow: 0 2px 14px rgba(0,0,0,.5);
+    margin-top: 26px; font-family: Georgia, serif; font-weight: bold; color: #fff7ec; line-height: 1.1;
+    font-size: clamp(32px, 9vw, 64px); text-shadow: 0 3px 18px rgba(0,0,0,.55);
+    animation: bat 1.6s ease-in-out infinite;
   }
-  .fete-signe {
-    margin-top: 8px; font-family: Georgia, serif; font-style: italic;
-    color: #f2d9c9; font-size: clamp(17px, 4.5vw, 26px);
+  @keyframes bat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+  .fete-mot2 {
+    margin-top: 14px; font-family: Georgia, serif; color: #ffe9d9; line-height: 1.35; max-width: 15em;
+    font-size: clamp(16px, 4vw, 26px); text-shadow: 0 2px 10px rgba(0,0,0,.45);
   }
   .fete-fermer {
     position: absolute; bottom: 26px; z-index: 1;
@@ -289,9 +296,9 @@
 <div class="fete" id="fete" hidden data-photos='{{ richard|tojson }}'>
   <div class="fete-hearts" id="feteHearts" aria-hidden="true"></div>
   <div class="fete-carte">
-    <div class="fete-photo"><img id="feteImg" alt="Richard Lee"><span class="fete-coeur">💗</span></div>
+    <div class="fete-photo"><img id="feteImg" alt=""><span class="fete-coeur">💗</span></div>
     <div class="fete-mot">Je t'aime, Corinne</div>
-    <div class="fete-signe">— Richard Lee</div>
+    <div class="fete-mot2">Merci pour tout ton travail sur ton application ❤</div>
   </div>
   <div class="fete-fermer">toucher pour continuer</div>
 </div>
@@ -512,18 +519,20 @@ function fete() {
     photo.classList.add("vide");   // no photo yet: a big heart stands in
   }
 
-  // scatter floating hearts
-  const coeurs = ["💗", "💖", "❤️", "💘", "💕"];
+  // scatter drifting hearts of varied sizes
+  const coeurs = ["💗", "💖", "❤️", "💘", "💕", "🩷"];
   const champ = el("feteHearts");
   champ.innerHTML = "";
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 44; i++) {
     const s = document.createElement("span");
     s.textContent = coeurs[i % coeurs.length];
     s.style.left = Math.random() * 100 + "vw";
-    s.style.setProperty("--dur", (3 + Math.random() * 3).toFixed(2) + "s");
-    s.style.setProperty("--delay", (Math.random() * 3).toFixed(2) + "s");
-    s.style.setProperty("--spin", (Math.random() * 80 - 40).toFixed(0) + "deg");
-    s.style.fontSize = (20 + Math.random() * 26).toFixed(0) + "px";
+    s.style.fontSize = (18 + Math.random() * 40).toFixed(0) + "px";
+    s.style.setProperty("--dur", (4.5 + Math.random() * 4).toFixed(2) + "s");
+    s.style.setProperty("--delay", (Math.random() * 5).toFixed(2) + "s");
+    s.style.setProperty("--sway", (Math.random() * 80 - 40).toFixed(0) + "px");
+    s.style.setProperty("--r1", (Math.random() * 40 - 20).toFixed(0) + "deg");
+    s.style.setProperty("--r2", (Math.random() * 40 - 20).toFixed(0) + "deg");
     champ.appendChild(s);
   }
 
@@ -535,7 +544,7 @@ function fete() {
   // setTimeout, not requestAnimationFrame: rAF is paused in a background tab,
   // which would leave the overlay stuck at opacity 0.
   feteShowTimer = setTimeout(() => box.classList.add("vu"), 30);
-  feteTimer = setTimeout(fermerFete, 9000);
+  feteTimer = setTimeout(fermerFete, 12000);
 }
 
 function fermerFete() {
