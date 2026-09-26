@@ -380,11 +380,45 @@ def describe(combo, values=None, progress=None):
     return payload
 
 
+# Corinne's first full day on the collector; the daily-average metric counts from here.
+AVERAGE_START = datetime(2026, 8, 26, tzinfo=timezone.utc)
+
+
+def average_per_day():
+    """Completed combinaisons per calendar day since AVERAGE_START, her local time.
+
+    The denominator is every day in the window, worked or not, so it reads as a
+    steady pace rather than a best-day figure.
+    """
+    tz = report_tz()
+    start = AVERAGE_START.astimezone(tz).date()
+    today = datetime.now(tz).date()
+    days = max(1, (today - start).days + 1)
+    with db() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT updated_at FROM entries "
+            "WHERE amour <> '' AND argent <> '' AND projet <> '' AND famille <> ''"
+        )
+        rows = cur.fetchall()
+    done = sum(
+        1
+        for (ts,) in rows
+        if ts and datetime.fromisoformat(ts).astimezone(tz).date() >= start
+    )
+    return {"avg": round(done / days, 1), "days": days, "since": start.isoformat()}
+
+
 def progress_summary(known=None):
     known = filled_keys() if known is None else known
     started = len(known)
     complete = sum(1 for is_complete in known.values() if is_complete)
-    return {"total": TOTAL, "started": started, "complete": complete}
+    return {
+        "total": TOTAL,
+        "started": started,
+        "complete": complete,
+        "per_day": average_per_day(),
+    }
 
 
 @app.route("/")

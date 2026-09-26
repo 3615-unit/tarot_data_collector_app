@@ -40,6 +40,8 @@
   }
   .counter { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink-soft); }
   .counter b { color: var(--ink); font-size: 16px; }
+  .moyenne { display: block; margin-top: 2px; font-size: 13px; color: var(--ink-soft); }
+  .moyenne b { color: var(--ink); }
   .bar { max-width: 900px; margin: 8px auto 0; height: 6px; background: #e5dac3; border-radius: 99px; overflow: hidden; }
   .bar > i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .4s ease; }
 
@@ -241,7 +243,7 @@
 
 <header>
   <div class="headrow">
-    <div class="counter"><b id="done">0</b> / {{ total }} remplies · <span id="sess">0</span> aujourd'hui</div>
+    <div class="counter"><b id="done">0</b> / {{ total }} remplies · <span id="sess">0</span> aujourd'hui<span class="moyenne" id="moyenne"></span></div>
   </div>
   <div class="bar"><i id="barfill"></i></div>
 </header>
@@ -349,6 +351,10 @@ function hasContent(v) {
 function renderProgress(p) {
   el("done").textContent = p.started;
   el("barfill").style.width = (100 * p.started / p.total).toFixed(2) + "%";
+  if (p.per_day) {
+    const n = p.per_day.avg.toFixed(1).replace(".", ",");
+    el("moyenne").innerHTML = `Moyenne : <b>${n}</b> par jour depuis le 26 août`;
+  }
 }
 
 function render(data) {
