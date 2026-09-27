@@ -4,7 +4,9 @@
 time with four fields (Amour, Argent, Projet/Travail, Famille/Entourage) that
 autosave as they are typed.
 
-Storage is SQLite locally, Postgres when DATABASE_URL is set.
+Storage is SQLite locally, Postgres when DATABASE_URL is set. In Postgres the
+table lives in its own schema, `combinaisons`, in the database it shares with
+the tarot reading app (which owns `tarot`).
 """
 
 import csv
@@ -40,6 +42,11 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 ACCESS_CODE = os.environ.get("ACCESS_CODE", "").strip()
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
 SQLITE_PATH = os.environ.get("SQLITE_PATH", str(ROOT / "combinaisons.db"))
+
+# The one table this app owns. Named in full in Postgres rather than relying on
+# search_path, which Neon's pooler does not keep between requests. SQLite has
+# no schemas, so locally it is just `entries`.
+ENTRIES = "combinaisons.entries" if DATABASE_URL else "entries"
 
 # Daily email report (see /tasks/daily-report). All optional: with none set the
 # endpoint still renders a dry-run report but refuses to send.
@@ -184,9 +191,11 @@ def q(sql):
 def init_db():
     with db() as conn:
         cur = conn.cursor()
+        if using_postgres():
+            cur.execute("CREATE SCHEMA IF NOT EXISTS combinaisons")
         cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS entries (
+            f"""
+            CREATE TABLE IF NOT EXISTS {ENTRIES} (
                 combo_key  TEXT PRIMARY KEY,
                 card_a     TEXT NOT NULL,
                 orient_a   TEXT NOT NULL,
@@ -201,51 +210,17 @@ def init_db():
             """
         )
 
-        # `entries` stores card codes (00-21) so it never depends on the French
-        # names. This reference table plus the `combinations` view below exist
-        # only so the database is legible when browsed directly (in Neon, say):
-        # open `combinations` and every row shows real names and orientations.
-        # The app itself never reads either — it keeps using `entries`.
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS cards (code TEXT PRIMARY KEY, name TEXT NOT NULL)"
-        )
-        for card in CARDS:
-            if using_postgres():
-                cur.execute(
-                    "INSERT INTO cards (code, name) VALUES (%s, %s) "
-                    "ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name",
-                    (card["id"], card["name"]),
-                )
-            else:
-                cur.execute(
-                    "INSERT OR REPLACE INTO cards (code, name) VALUES (?, ?)",
-                    (card["id"], card["name"]),
-                )
-
-        # Rebuilt each boot so a renamed card flows through. DROP + CREATE works
-        # on both SQLite and Postgres; '' is the SQL escape for a literal quote.
-        cur.execute("DROP VIEW IF EXISTS combinations")
-        cur.execute(
-            """
-            CREATE VIEW combinations AS
-            SELECT e.combo_key,
-                   ca.name AS carte_1,
-                   CASE e.orient_a WHEN 'R' THEN 'renversée' ELSE 'à l''endroit' END AS orientation_1,
-                   cb.name AS carte_2,
-                   CASE e.orient_b WHEN 'R' THEN 'renversée' ELSE 'à l''endroit' END AS orientation_2,
-                   e.amour, e.argent, e.projet, e.famille, e.updated_at
-            FROM entries e
-            JOIN cards ca ON ca.code = e.card_a
-            JOIN cards cb ON cb.code = e.card_b
-            """
-        )
+        # Codes only (00-21), never names. The readable `combinations` view,
+        # with card names in place of codes, is built by the tarot app's
+        # schema.py from its own tarot.cards, the one cards table in the
+        # database. This app keeps no copy of the names in the database.
 
 
 def fetch_entry(combo_key):
     with db() as conn:
         cur = conn.cursor()
         cur.execute(
-            q("SELECT amour, argent, projet, famille FROM entries WHERE combo_key = %s"),
+            q(f"SELECT amour, argent, projet, famille FROM {ENTRIES} WHERE combo_key = %s"),
             (combo_key,),
         )
         row = cur.fetchone()
@@ -260,8 +235,8 @@ def save_entry(combo, values):
         cur = conn.cursor()
         cur.execute(
             q(
-                """
-                INSERT INTO entries
+                f"""
+                INSERT INTO {ENTRIES}
                     (combo_key, card_a, orient_a, card_b, orient_b,
                      amour, argent, projet, famille, updated_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -293,11 +268,11 @@ def filled_keys():
     with db() as conn:
         cur = conn.cursor()
         cur.execute(
-            """
+            f"""
             SELECT combo_key,
                    CASE WHEN amour <> '' AND argent <> '' AND projet <> '' AND famille <> ''
                         THEN 1 ELSE 0 END AS complete
-            FROM entries
+            FROM {ENTRIES}
             WHERE amour <> '' OR argent <> '' OR projet <> '' OR famille <> ''
             """
         )
@@ -308,10 +283,10 @@ def all_entries():
     with db() as conn:
         cur = conn.cursor()
         cur.execute(
-            """
+            f"""
             SELECT combo_key, card_a, orient_a, card_b, orient_b,
                    amour, argent, projet, famille, updated_at
-            FROM entries ORDER BY combo_key
+            FROM {ENTRIES} ORDER BY combo_key
             """
         )
         columns = [
@@ -397,7 +372,7 @@ def average_per_day():
     with db() as conn:
         cur = conn.cursor()
         cur.execute(
-            "SELECT updated_at FROM entries "
+            f"SELECT updated_at FROM {ENTRIES} "
             "WHERE amour <> '' AND argent <> '' AND projet <> '' AND famille <> ''"
         )
         rows = cur.fetchall()
